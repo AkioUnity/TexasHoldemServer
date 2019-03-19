@@ -1,0 +1,13 @@
+## Ignore build results and temporary files.
+
+.idea
+bin
+obj
+
+*.mdb
+*.pdb
+*.pidb
+*.suo
+*.user
+*.userprefs
+UpgradeLog*.*
