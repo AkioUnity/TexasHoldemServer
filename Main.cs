@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using TexasHoldemServer.Network.ProtocolWork;
 
 namespace TexasHoldemServer
@@ -70,6 +71,7 @@ namespace TexasHoldemServer
             else
             {
                 AddServerLog("Database open success");
+                Debug.WriteLine("database open");
                 db.DisconnectDatabase();
             }
             /*if (DB.Instance.ConnectDatabase() == false)
@@ -173,6 +175,32 @@ namespace TexasHoldemServer
         {
             LogMessageManager.AddLogMessage("Connect Client : " + r.client.endPoint.ToString(), true);
             //AddServerLog("Connect Client : " + r.client.endPoint.ToString());
+            
+            
+            string key0 = Encoding.UTF8.GetString (r.client.buffer);
+//            Debug.WriteLine("header:"+key0);
+            if (!key0.Contains("WebSocket-Key:"))
+                return;
+            key0 = key0.Replace("ey:", "`");
+            key0=key0.Split('`')[1]  ;              // dGhlIHNhbXBsZSBub25jZQ== \r\n .......
+            key0=key0.Replace("\r", "").Split('\n')[0];  // dGhlIHNhbXBsZSBub25jZQ==
+            
+            string key=key0.Trim();
+            Debug.WriteLine("key:"+key);
+            // key should now equal 1pnNu4xgnBqw+tS5LrrLSw==
+            var test1 =  AcceptKey(ref key);
+
+            var newLine = "\r\n";
+
+            var response = "HTTP/1.1 101 Switching Protocols" + newLine
+                                                              + "Upgrade: websocket" + newLine
+                                                              + "Connection: Upgrade" + newLine
+                                                              + "Sec-WebSocket-Accept: " + test1 + newLine + newLine
+                //+ "Sec-WebSocket-Protocol: chat, superchat" + newLine
+                //+ "Sec-WebSocket-Version: 13" + newLine
+                ;
+            // which one should I use? none of them fires the onopen method
+            r.client.workSocket.Send(Encoding.UTF8.GetBytes(response));
         }
 
         void DisconnectClient(RecvDataWork r)
@@ -213,6 +241,20 @@ namespace TexasHoldemServer
                 db.ExeQuery("insert into AI_Nickname(Nickname) values ('Bot-"+i.ToString("000")+"')");
             }
             db.DisconnectDatabase();
+        }
+        
+        private static string AcceptKey(ref string key)
+        {
+            string guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+            string longKey = key + guid;
+            byte[] hashBytes = ComputeHash(longKey);
+            return Convert.ToBase64String(hashBytes);
+        }
+
+        static SHA1 sha1 = SHA1CryptoServiceProvider.Create();
+        private static byte[] ComputeHash(string str)
+        {
+            return sha1.ComputeHash(System.Text.Encoding.ASCII.GetBytes(str));
         }
     }
 }

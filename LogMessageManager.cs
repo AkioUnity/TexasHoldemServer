@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -87,6 +88,7 @@ class LogMessageManager
                 m_FileWriter.FileLog(message);
             }
         }
+        Debug.WriteLine(message);
     }
 
     public static void AddLogFile(string message)

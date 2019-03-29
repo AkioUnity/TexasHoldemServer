@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using TexasHoldemServer.Network.ProtocolWork;
 
@@ -130,7 +131,7 @@ namespace TexasHoldemServer
 
         public void AcceptClient(string ip, ClientObject client)
         {
-            //Debug.Log("connect client : " + ip);
+            Debug.WriteLine("Accept client : " + ip);
             lock (m_Lock)
             {
                 RecvDataWork w = new RecvDataWork(client);
@@ -179,7 +180,7 @@ namespace TexasHoldemServer
                         ClientDebugGetMoney(d.client, d.data);
                         break;
                     case Protocols.LogOut:
-                        m_Server.DisconnectClient_Out(d.client);
+                        m_Server.DisconnectClient_Out(d.client);//amg code
                         break;
                 }
             }

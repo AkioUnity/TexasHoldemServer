@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace TexasHoldemServer
         public void AddBuffer(byte[] data, int length)
         {
             Array.Copy(data, 0, buffer, BufferPos, length);
-            BufferPos += length;
+            BufferPos += length-6;  //amg (added -6)
         }
 
         public byte[] Work()
@@ -25,9 +26,11 @@ namespace TexasHoldemServer
             if (BufferPos < 12)
                 return null;
             int workPos = 0;
+            Debug.WriteLine("BufferPos:"+BufferPos);
             while (BufferPos >= workPos + 12)
             {
                 int len = BitConverter.ToInt32(buffer, workPos);
+                Debug.WriteLine("len:"+len);
                 if (len > ClientObject.BufferSize)
                 {
                     workPos += 1;
@@ -64,6 +67,7 @@ namespace TexasHoldemServer
         public Socket workSocket = null;
         public const int BufferSize = 2048;
         public byte[] buffer = new byte[BufferSize];
+        public string header;
 
         public int packetNumber = 0;
 
@@ -135,7 +139,9 @@ namespace TexasHoldemServer
             packetNumber++;
             try
             {
-                workSocket.Send(SendData);
+//                workSocket.Send(SendData);
+                Debug.WriteLine("send protocol:"+protocol);
+                workSocket.Send(GetFrame(SendData));
             }
             catch(SocketException e)
             {
@@ -145,6 +151,93 @@ namespace TexasHoldemServer
             {
                 LogMessageManager.AddLogFile("send error - " + endPoint.ToString() + " / " + e.ToString());
             }
+        }
+        
+        //function to create  frames to send to client 
+        /// <summary>
+        /// Enum for opcode types
+        /// </summary>
+        public enum EOpcodeType
+        {
+            /* Denotes a continuation code */
+            Fragment = 0,
+    
+            /* Denotes a text code */
+            Text = 1,
+    
+            /* Denotes a binary code */
+            Binary = 2,
+    
+            /* Denotes a closed connection */
+            ClosedConnection = 8,
+    
+            /* Denotes a ping*/
+            Ping = 9,
+    
+            /* Denotes a pong */
+            Pong = 10
+        }
+    
+        /// <summary>Gets an encoded websocket frame to send to a client from a string</summary>
+        /// <param name="Message">The message to encode into the frame</param>
+        /// <param name="Opcode">The opcode of the frame</param>
+        /// <returns>Byte array in form of a websocket frame</returns>
+        public static byte[] GetFrame(byte[] bytesRaw, EOpcodeType Opcode = EOpcodeType.Binary)
+        {
+            byte[] response;
+//            byte[] bytesRaw = Encoding.Default.GetBytes(Message);
+            byte[] frame = new byte[10];
+    
+            int indexStartRawData = -1;
+            int length = bytesRaw.Length;
+    
+            frame[0] = (byte)(128 + (int)Opcode);
+            if (length <= 125)
+            {
+                frame[1] = (byte)length;
+                indexStartRawData = 2;
+            }
+            else if (length >= 126 && length <= 65535)
+            {
+                frame[1] = (byte)126;
+                frame[2] = (byte)((length >> 8) & 255);
+                frame[3] = (byte)(length & 255);
+                indexStartRawData = 4;
+            }
+            else
+            {
+                frame[1] = (byte)127;
+                frame[2] = (byte)((length >> 56) & 255);
+                frame[3] = (byte)((length >> 48) & 255);
+                frame[4] = (byte)((length >> 40) & 255);
+                frame[5] = (byte)((length >> 32) & 255);
+                frame[6] = (byte)((length >> 24) & 255);
+                frame[7] = (byte)((length >> 16) & 255);
+                frame[8] = (byte)((length >> 8) & 255);
+                frame[9] = (byte)(length & 255);
+    
+                indexStartRawData = 10;
+            }
+    
+            response = new byte[indexStartRawData + length];
+    
+            int i, reponseIdx = 0;
+    
+            //Add the frame bytes to the reponse
+            for (i = 0; i < indexStartRawData; i++)
+            {
+                response[reponseIdx] = frame[i];
+                reponseIdx++;
+            }
+    
+            //Add the data bytes to the response
+            for (i = 0; i < length; i++)
+            {
+                response[reponseIdx] = bytesRaw[i];
+                reponseIdx++;
+            }
+    
+            return response;
         }
 
         public void SendInt(Protocols protocol, int iValue)

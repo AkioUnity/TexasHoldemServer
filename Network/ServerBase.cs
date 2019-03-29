@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Diagnostics;
 
 namespace TexasHoldemServer
 {
@@ -98,7 +96,7 @@ namespace TexasHoldemServer
 
         public void Log(string str)
         {
-            Debug.WriteLine(str);
+//            Debug.WriteLine(str);
             //LogMessageManager.AddLogFile(str);
             LogMessageManager.AddLogMessage(str, true);
         }
@@ -118,7 +116,7 @@ namespace TexasHoldemServer
                 Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
                 sock.Bind(iep);
-                sock.Listen(10);
+                sock.Listen(100);
                 m_Sock = new ServerAcceptSock();
                 m_Sock.Sock = sock;
                 m_Sock.OnAccept = AcceptCallback;
@@ -126,6 +124,7 @@ namespace TexasHoldemServer
                 //m_AcceptAR = m_Sock.BeginAccept(new AsyncCallback(AcceptCallback), m_Sock);
 
                 IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+                Log(Dns.GetHostName());
                 foreach (IPAddress ip in host.AddressList)
                 {
                     if (ip.AddressFamily == AddressFamily.InterNetwork)
@@ -137,15 +136,15 @@ namespace TexasHoldemServer
             {
                 m_LastErrorMessage = e.ToString();
                 //Debug.Log(e.ToString());
-                System.Diagnostics.Trace.Fail(e.ToString());
-                StopServer();
+                Trace.Fail(e.ToString());
+                StopServer(); 
                 return false;
             }
             catch (Exception e)
             {
                 m_LastErrorMessage = e.ToString();
                 //Debug.Log(e.ToString());
-                System.Diagnostics.Trace.Fail(e.ToString());
+                Trace.Fail(e.ToString());
                 StopServer();
                 return false;
             }
@@ -238,8 +237,11 @@ namespace TexasHoldemServer
                 state.IsConnected = true;
                 //m_AcceptAR = m_Sock.BeginAccept(new AsyncCallback(AcceptCallback), m_Sock);
                 m_Sock.BeginAccept();
+                Debug.WriteLine("AcceptCallback");
                 if (m_Listener != null)
+                {
                     m_Listener.AcceptClient(state.workSocket.RemoteEndPoint.ToString(), state);
+                }
             }
             catch (Exception e)
             {
@@ -269,7 +271,7 @@ namespace TexasHoldemServer
             {
                 if(obj.workSocket!=null)
                 {
-                    obj.workSocket.Close();
+                //    obj.workSocket.Close();
                 }
                 DisconnectClient(obj);
             }
@@ -298,13 +300,17 @@ namespace TexasHoldemServer
                 }
                 // Read data from the client socket.   
                 int bytesRead = handler.EndReceive(ar);
-                /*Log("read a : " + state.testIdx);
-                Thread.Sleep(2000);
-                Log("read b : " + state.testIdx);*/
+                Debug.WriteLine("ReadCallBack bytesRead:"+bytesRead);
+//                state.workSocket.Send(state.buffer);
+//                Thread.Sleep(2000);
+
+                string key0 = Encoding.UTF8.GetString(state.buffer).Substring(0, bytesRead);
+                    
                 if (bytesRead > 0)
                 {
-                    if (bytesRead > 8)
+                    if (bytesRead > 8 && (!key0.Contains("WebSocket-Key:")))
                     {
+                        GetDecodedData(state.buffer, bytesRead);
                         state.WorkBuf.AddBuffer(state.buffer, bytesRead);
                         while(true)
                         {
@@ -344,5 +350,49 @@ namespace TexasHoldemServer
         {
             m_ClientMgr.KickClinet(UserIdx);
         }
+        
+        public static void GetDecodedData(byte[] buffer, int length)
+        {
+            byte b = buffer[1];
+            int dataLength = 0;
+            int totalLength = 0;
+            int keyIndex = 0;
+
+            if (b - 128 <= 125)
+            {
+                dataLength = b - 128;
+                keyIndex = 2;
+                totalLength = dataLength + 6;
+            }
+
+            if (b - 128 == 126)
+            {
+                dataLength = BitConverter.ToInt16(new byte[] { buffer[3], buffer[2] }, 0);
+                keyIndex = 4;
+                totalLength = dataLength + 8;
+            }
+
+            if (b - 128 == 127)
+            {
+                dataLength = (int)BitConverter.ToInt64(new byte[] { buffer[9], buffer[8], buffer[7], buffer[6], buffer[5], buffer[4], buffer[3], buffer[2] }, 0);
+                keyIndex = 10;
+                totalLength = dataLength + 14;
+            }
+
+            if (totalLength > length)
+                throw new Exception("The buffer length is small than the data length");
+
+            byte[] key = new byte[] { buffer[keyIndex], buffer[keyIndex + 1], buffer[keyIndex + 2], buffer[keyIndex + 3] };
+
+            int dataIndex = keyIndex + 4;
+            int count = 0;
+            for (int i = dataIndex; i < totalLength; i++)
+            {
+                buffer[i-dataIndex] = (byte)(buffer[i] ^ key[count % 4]);
+                count++;
+            }
+        }
+
     }
 }
+
