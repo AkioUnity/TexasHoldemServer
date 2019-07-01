@@ -320,6 +320,7 @@ namespace TexasHoldemServer
                             int length = BitConverter.ToInt32(data, 0);
                             int packetNum = BitConverter.ToInt32(data, 4);
                             int protocol = BitConverter.ToInt32(data, 8);
+                            Debug.WriteLine("Recv:"+(Protocols)protocol);
                             if (m_Listener != null)
                                 m_Listener.RecvData(state, (Protocols)protocol, data);
                         }

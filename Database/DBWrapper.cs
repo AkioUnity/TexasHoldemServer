@@ -39,7 +39,8 @@ public class DBWrapper
         try
         {
             //m_dbcon.ConnectionString = "Password=Dnsduqrhd777;Persist Security Info=True;User ID=smj2350;Initial Catalog=TexasHoldem;Data Source=211.238.13.182";
-            m_dbcon.ConnectionString = "Password=Dnsduqrhd777;Persist Security Info=True;User ID=smj2350;Initial Catalog=testGameServer;Data Source=211.238.13.182";
+//            m_dbcon.ConnectionString = "Password=Dnsduqrhd777;Persist Security Info=True;User ID=smj2350;Initial Catalog=testGameServer;Data Source=211.238.13.182";
+            m_dbcon.ConnectionString = "Password=gaja2010;Persist Security Info=True;User ID=weblogin;Initial Catalog=testGameServer;Data Source=124.158.124.3";
             m_dbcon.Open(); 
         }
         //catch (SqlException e)

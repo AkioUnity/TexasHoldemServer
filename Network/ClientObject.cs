@@ -23,15 +23,21 @@ namespace TexasHoldemServer
 
         public byte[] Work()
         {
+//            BufferPos -= 6;
             if (BufferPos < 12)
+            {
+                Debug.WriteLine("null BufferPos:"+BufferPos);
+                BufferPos = 0;
                 return null;
+            }
+                
             int workPos = 0;
             Debug.WriteLine("BufferPos:"+BufferPos);
             while (BufferPos >= workPos + 12)
             {
                 int len = BitConverter.ToInt32(buffer, workPos);
-                Debug.WriteLine("len:"+len);
-                if (len > ClientObject.BufferSize)
+                Debug.WriteLine("len:"+len+" "+BitConverter.ToInt32(buffer, workPos));
+                if (len > ClientObject.BufferSize || len < 0)
                 {
                     workPos += 1;
                     continue;
@@ -42,8 +48,10 @@ namespace TexasHoldemServer
                 Array.Copy(buffer, workPos, rData, 0, len);
                 workPos += len;
                 PopFront(workPos);
+                Debug.WriteLine("return rData len:"+len+" bufferPos:"+BufferPos+" workPos:"+workPos);
                 return rData;
             }
+            Debug.WriteLine("out while Bufferpos:"+BufferPos+" workPos:"+workPos);
             PopFront(workPos);
             return null;
         }
@@ -57,6 +65,7 @@ namespace TexasHoldemServer
                 return;
             }
             Array.Copy(buffer, length, buffer, 0, LeftLen);
+            Debug.WriteLine("PopFront length:"+length+" BufferPos:"+BufferPos);
             BufferPos -= length;
         }
     }

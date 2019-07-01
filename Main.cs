@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Threading;
 using TexasHoldemServer.Network.ProtocolWork;
+using Timer = System.Windows.Forms.Timer;
 
 namespace TexasHoldemServer
 {
@@ -114,11 +116,7 @@ namespace TexasHoldemServer
             {
                 if (m_Server.StartServer(m_ServerPort) == true)
                 {
-                    m_Server.InitServer();
-                    AddServerLog("Server start  - port:" + m_ServerPort);
-                    StartServer.Text = "StopServer";
-                    ServerIPAddressLabel.Text = "Server IP Address : " + m_Server.LocalIPAddress + ":" + m_ServerPort;
-                    //m_Timer.Start();
+                    StartWebsocketServer();
                 }
                 else
                 {
@@ -126,6 +124,15 @@ namespace TexasHoldemServer
                 }
             }
            
+        }
+
+        void StartWebsocketServer()
+        {
+            m_Server.InitServer();
+            AddServerLog("Server start  - port:" + m_ServerPort);
+            StartServer.Text = "StopServer";
+            ServerIPAddressLabel.Text = "Server IP Address : " + m_Server.LocalIPAddress + ":" + m_ServerPort;
+            //m_Timer.Start();
         }
         private void RestartAcceptWork(object sender, EventArgs evt)
         {

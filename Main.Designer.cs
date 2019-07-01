@@ -53,7 +53,7 @@
             this.ServerLog.ItemHeight = 12;
             this.ServerLog.Location = new System.Drawing.Point(12, 41);
             this.ServerLog.Name = "ServerLog";
-            this.ServerLog.Size = new System.Drawing.Size(638, 124);
+            this.ServerLog.Size = new System.Drawing.Size(838, 324);
             this.ServerLog.TabIndex = 1;
             // 
             // ServerIPAddressLabel
@@ -69,7 +69,7 @@
             // 
             this.btDebugAllSetMoney.Location = new System.Drawing.Point(12, 256);
             this.btDebugAllSetMoney.Name = "btDebugAllSetMoney";
-            this.btDebugAllSetMoney.Size = new System.Drawing.Size(213, 23);
+            this.btDebugAllSetMoney.Size = new System.Drawing.Size(0, 0);  //213,23
             this.btDebugAllSetMoney.TabIndex = 3;
             this.btDebugAllSetMoney.Text = "Debug All Money 100000";
             this.btDebugAllSetMoney.UseVisualStyleBackColor = true;
@@ -79,7 +79,7 @@
             // 
             this.btUserBlock.Location = new System.Drawing.Point(122, 184);
             this.btUserBlock.Name = "btUserBlock";
-            this.btUserBlock.Size = new System.Drawing.Size(99, 21);
+            this.btUserBlock.Size = new System.Drawing.Size(0, 0); //90,21
             this.btUserBlock.TabIndex = 4;
             this.btUserBlock.Text = "BlockUser";
             this.btUserBlock.UseVisualStyleBackColor = true;
@@ -89,14 +89,14 @@
             // 
             this.tbBlockID.Location = new System.Drawing.Point(12, 184);
             this.tbBlockID.Name = "tbBlockID";
-            this.tbBlockID.Size = new System.Drawing.Size(104, 21);
+            this.tbBlockID.Size = new System.Drawing.Size(0, 0); // (104, 21);
             this.tbBlockID.TabIndex = 5;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(662, 291);
+            this.ClientSize = new System.Drawing.Size(862, 391);
             this.Controls.Add(this.tbBlockID);
             this.Controls.Add(this.btUserBlock);
             this.Controls.Add(this.btDebugAllSetMoney);
