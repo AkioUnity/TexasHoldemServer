@@ -300,7 +300,7 @@ namespace TexasHoldemServer
                 }
                 // Read data from the client socket.   
                 int bytesRead = handler.EndReceive(ar);
-                Debug.WriteLine("ReadCallBack bytesRead:"+bytesRead);
+//                Debug.WriteLine("ReadCallBack bytesRead:"+bytesRead);
 //                state.workSocket.Send(state.buffer);
 //                Thread.Sleep(2000);
 
@@ -320,7 +320,14 @@ namespace TexasHoldemServer
                             int length = BitConverter.ToInt32(data, 0);
                             int packetNum = BitConverter.ToInt32(data, 4);
                             int protocol = BitConverter.ToInt32(data, 8);
-                            Debug.WriteLine("Recv:"+(Protocols)protocol);
+                            if (LogMessageManager.isDebug)
+                            {
+                                if (state.UserData==null)
+                                    Debug.WriteLine("Recv:"+(Protocols)protocol+" n:"+state.packetNumber+" L:"+data.Length);
+                                else
+                                    Debug.WriteLine("Recv:"+(Protocols)protocol+" n:"+state.packetNumber+" L:"+data.Length+"  id:"+state.UserData.UserIndex);    
+                            }
+                            
                             if (m_Listener != null)
                                 m_Listener.RecvData(state, (Protocols)protocol, data);
                         }
@@ -396,4 +403,3 @@ namespace TexasHoldemServer
 
     }
 }
-

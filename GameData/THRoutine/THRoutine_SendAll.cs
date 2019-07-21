@@ -108,6 +108,8 @@ public class THRoutine_SendAll : THRoutine_Player {
     /// 
     /// </summary>
     protected bool m_CheckAllReady = false;
+
+    public bool fakeReady = false;
     /// <summary>
     /// 전체에게 준비 신호를 보내어 모든 플레이어의 준비를 기다린다
     /// </summary>
@@ -117,6 +119,17 @@ public class THRoutine_SendAll : THRoutine_Player {
             return;
         m_CheckAllReady = true;
         m_SendAllReady();
+        m_SendAllReadyDelayTimer.Reset();
+        m_SendAllReadyDelayTimer.Start();
+    }
+    
+    protected void SendAll_ReadyFake()
+    {
+        if (m_SendAllReady == null)
+            return;
+        m_CheckAllReady = true;
+        fakeReady = true;
+//        m_SendAllReady();
         m_SendAllReadyDelayTimer.Reset();
         m_SendAllReadyDelayTimer.Start();
     }

@@ -26,17 +26,17 @@ namespace TexasHoldemServer
 //            BufferPos -= 6;
             if (BufferPos < 12)
             {
-                Debug.WriteLine("null BufferPos:"+BufferPos);
+//                Debug.WriteLine("null BufferPos:"+BufferPos);
                 BufferPos = 0;
                 return null;
             }
                 
             int workPos = 0;
-            Debug.WriteLine("BufferPos:"+BufferPos);
+//            Debug.WriteLine("BufferPos:"+BufferPos);
             while (BufferPos >= workPos + 12)
             {
                 int len = BitConverter.ToInt32(buffer, workPos);
-                Debug.WriteLine("len:"+len+" "+BitConverter.ToInt32(buffer, workPos));
+//                Debug.WriteLine("len:"+len+" "+BitConverter.ToInt32(buffer, workPos));
                 if (len > ClientObject.BufferSize || len < 0)
                 {
                     workPos += 1;
@@ -48,10 +48,10 @@ namespace TexasHoldemServer
                 Array.Copy(buffer, workPos, rData, 0, len);
                 workPos += len;
                 PopFront(workPos);
-                Debug.WriteLine("return rData len:"+len+" bufferPos:"+BufferPos+" workPos:"+workPos);
+//                Debug.WriteLine("return rData len:"+len+" bufferPos:"+BufferPos+" workPos:"+workPos);
                 return rData;
             }
-            Debug.WriteLine("out while Bufferpos:"+BufferPos+" workPos:"+workPos);
+//            Debug.WriteLine("out while Bufferpos:"+BufferPos+" workPos:"+workPos);
             PopFront(workPos);
             return null;
         }
@@ -149,7 +149,8 @@ namespace TexasHoldemServer
             try
             {
 //                workSocket.Send(SendData);
-                Debug.WriteLine("send protocol:"+protocol);
+                if (UserData!=null && LogMessageManager.isDebug)
+                    Debug.WriteLine("send:"+protocol+" n:"+packetNumber+" L:"+data.Length+"  id:"+UserData.UserIndex);
                 workSocket.Send(GetFrame(SendData));
             }
             catch(SocketException e)

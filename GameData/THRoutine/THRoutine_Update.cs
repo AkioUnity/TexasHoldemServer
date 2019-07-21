@@ -56,7 +56,7 @@ public partial class THRoutine
     public void FirstDelayWorkEnd()
     {
         m_GameStep++;
-        SendAll_Ready();
+        SendAll_ReadyFake();
     }
 
     public void Update()
@@ -84,8 +84,12 @@ public partial class THRoutine
     {
         if (m_CheckAllReady == false)
             return;
-
-        if (m_SendAllReadyDelayTimer.ElapsedMilliseconds < 2000)
+        if (fakeReady)
+        {
+            Debug.WriteLine("fakeReady");
+            fakeReady = false;
+        }
+        else if (m_SendAllReadyDelayTimer.ElapsedMilliseconds < 2000)
         {
             int i, j;
             j = GetPlayerCount();
@@ -106,7 +110,7 @@ public partial class THRoutine
         }
         m_SendAllReadyDelayTimer.Reset();
         m_CheckAllReady = false;
-        UserReadyZero();
+        UserReadyZero();  //set from true to m_CheckReady=false
         m_NextWork += GameStepWork;
     }
 

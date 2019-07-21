@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 #if !(UNITY_EDITOR)
 using TexasHoldemServer;
 #endif
@@ -50,11 +51,12 @@ public partial class THRoutine : THRoutine_SendAll
     {
         try
         {
+            LogMessageManager.AddLogMessage("Step:"+m_GameStep);
             switch (m_GameStep)
             {
                 case GameStep.HoleReady:
                     HoleCardWork();
-                    FirstDelayStart(6000);
+                    FirstDelayStart(1000);
                     m_GameStep++;
                     break;
                 case GameStep.Blind:
@@ -115,7 +117,9 @@ public partial class THRoutine : THRoutine_SendAll
         m_IsAllInUser = false;
         m_GameStep = GameStep.HoleReady;
         SendAll_GameStart();
-        SendAll_Ready();
+        SendAll_ReadyFake();
+//        SendAll_Ready();
+
     }
 
     void HoleCardWork()

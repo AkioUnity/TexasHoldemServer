@@ -60,7 +60,9 @@ public class FileWriter
         //path += dt.ToString("HHmm") + ".txt";
         path += "Room-" + RoomIdx + ".txt";
         Open(path);
-        WriteLine(dt.ToString("yyyyMMdd-HHmmss(fff) : ") + str);
+        String log = dt.ToString("yyyyMMdd-HHmmss(fff) : ") + str;
+        WriteLine(log);
+        Debug.WriteLine(log);
         Close();
     }
 
@@ -74,11 +76,12 @@ public class FileWriter
 
 class LogMessageManager
 {
+    public static bool isDebug = false;
     static object m_Lock = new object();
     static List<string> m_Message = new List<string>();
     static FileWriter m_FileWriter = new FileWriter();
 
-    public static void AddLogMessage(string message, bool FileLog)
+    public static void AddLogMessage(string message, bool FileLog=false)
     {
         lock (m_Lock)
         {
